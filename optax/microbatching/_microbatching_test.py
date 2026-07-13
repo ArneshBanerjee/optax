@@ -532,6 +532,20 @@ class MicrobatchingTest(parameterized.TestCase):
         msg='micro_grad_step not found in profile',
     )
 
+  def test_reshape_all_args_unhashable_batch_dim(self):
+    def fn(b):
+      leaf = jax.ShapeDtypeStruct((b, 3), jnp.float32)
+      return microbatching._reshape_all_args(
+          microbatch_size=2,
+          argnums=(0,),
+          argnames=(),
+          in_axes=(0,),
+          args=(leaf,),
+          kwargs={},
+      )
+
+    jax.eval_shape(fn, 4)
+
 
 def _named_fun(a, b, c):
   return jnp.sum(a + b + c, axis=0)
